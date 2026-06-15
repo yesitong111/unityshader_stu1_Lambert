@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DiffuseVertexLevelMax
-  m_Shader: {fileID: 4800000, guid: f31d0244639566148b91425ec465507c, type: 3}
+  m_Name: DiffusePixelLevelMat
+  m_Shader: {fileID: 4800000, guid: 09e7f0118a65925478845bef7bf19f33, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []

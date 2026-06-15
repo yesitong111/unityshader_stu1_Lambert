@@ -1,27 +1,23 @@
+// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "Unity Shaders Book/Chapter 6/Diffuse Vertex_Level"
 {
     Properties
     {
         _Diffuse ("Diffuse", Color) = (1, 1, 1, 1)
     }
-    Shader "Unity Shaders Book/Chapter 6/Diffuse Vertex_Level"
-    {
-        Properties
-        {
-            _Diffuse ("Diffuse", Color) = (1, 1, 1, 1)
-        }
-        /*
+    /*
             定义了材质在 Inspector 中可调的属性。这里有一个属性：
             名称：_Diffuse（Shader 内部的变量名）
             显示名："Diffuse"（Inspector 中显示）
             类型：Color（颜色）
             默认值：(1,1,1,1) —— 即白色，不透明。
         */
-        SubShader
-        {
-            Pass{
-                Tags { "LightMode" = "ForwardBase" }//Tag "LightMode"="ForwardBase" 表示这个 Pass 用于前向渲染的基底光照通道（处理主光源与环境光，额外光通常用 ForwardAdd）
-            }
+    SubShader
+    {
+        Pass{
+            Tags { "LightMode" = "ForwardBase" }//Tag "LightMode"="ForwardBase" 表示这个 Pass 用于前向渲染的基底光照通道（处理主光源与环境光，额外光通常用 ForwardAdd）
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -44,10 +40,10 @@ Shader "Unity Shaders Book/Chapter 6/Diffuse Vertex_Level"
             {
                 v2f o;
                 // 将顶点从对象空间变换到裁剪空间
-                o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+                o.pos = UnityObjectToClipPos(v.vertex);
                 // 计算顶点的漫反射光照
                 fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;//获取环境光颜色RGB
-                fixed3 worldNormal = normalize(mul(v.normal,(float3x3)_World2Object)); //将法线从模型空间变换到世界空间，v.normal是模型空间下的法线，_World2Object是从世界空间到对象空间的变换矩阵，取其前三行三列得到旋转部分（法线是方向向量，等价于w=0的齐次坐标不需要平移变换，所以只需要3乘3），将法线乘以这个旋转矩阵即可得到世界空间下的法线。
+                fixed3 worldNormal = normalize(mul(v.normal,(float3x3)unity_WorldToObject)); //将法线从模型空间变换到世界空间，v.normal是模型空间下的法线，_World2Object是从世界空间到对象空间的变换矩阵，取其前三行三列得到旋转部分（法线是方向向量，等价于w=0的齐次坐标不需要平移变换，所以只需要3乘3），将法线乘以这个旋转矩阵即可得到世界空间下的法线。
                 //既然是模型转世界用_Object2World,那为什么不直接写mul(_Object2World, v.normal)呢？反而用_World2Object？因为法线是方向向量，不能直接用_Object2World矩阵变换，因为_Object2World矩阵包含了平移部分，而法线不应该受到平移影响(顶点位置可以直接用_Object2World,但是法线是垂直于表面的方向向量，如果模型被非均匀缩放，用_Object2World变换法线会歪掉·)。正确的做法是使用_World2Object矩阵的逆转置矩阵来变换法线，但在Unity中，_World2Object已经是逆矩阵，所以可以直接使用它来变换法线。
                 //mul()是一个矩阵乘法函数，接受一个向量和一个矩阵作为参数，返回矩阵与向量的乘积。这里的用法是将顶点的法线向量（v.normal）乘以_World2Object矩阵的旋转部分，以得到世界空间下的法线向量。mul(向量，矩阵)，向量在左，矩阵在右就是向量左乘矩阵，此时向量以行向量形式参与运算，mul()最终输出一个三维向量
                 //normalize()函数用于将向量归一化，即将其长度调整为1，保持方向不变。这样可以确保后续的光照计算中使用的法线是单位向量，避免因长度不为1而导致的光照计算错误。
@@ -57,11 +53,12 @@ Shader "Unity Shaders Book/Chapter 6/Diffuse Vertex_Level"
                 o.color = ambient + diffuse;//最终颜色 = 环境光 + 漫反射，o.color 存储了顶点的最终颜色值RGB类型是fixed3，将在片元着色器中进行插值后使用。
                 return o;
             }
-
+            fixed4 frag(v2f i) : SV_Target//片元着色器，输入为顶点着色器传递的结构体v2f，输出为一个四分量颜色（RGBA），使用SV_Target语义表示这是渲染目标的输出。
+            {
+                return fixed4(i.color, 1.0);//片元着色器直接输出顶点传递过来的颜色值，alpha通道设置为1.0（完全不透明）。由于顶点着色器计算的颜色已经包含了环境光和漫反射的贡献，所以片元着色器不需要进行额外的光照计算。
+            }
+            ENDCG
+        }
     }
-
-
-    }
-   
-
+    Fallback "Diffuse"//指定一个后备着色器，当当前平台不支持这个自定义着色器时，Unity 将使用内置的 Diffuse 着色器来渲染对象。这确保了在不支持自定义着色器的环境中，物体仍然能够正确显示。
 }
