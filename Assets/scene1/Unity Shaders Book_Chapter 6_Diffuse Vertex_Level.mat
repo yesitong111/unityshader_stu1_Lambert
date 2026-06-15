@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DiffuseVertexLevelMax
-  m_Shader: {fileID: 4800000, guid: 09e7f0118a65925478845bef7bf19f33, type: 3}
-  m_Parent: {fileID: 2100000, guid: 4d6f64f95bcd97a4fb1f06e14a7cca52, type: 2}
+  m_Name: Unity Shaders Book_Chapter 6_Diffuse Vertex_Level
+  m_Shader: {fileID: 4800000, guid: f31d0244639566148b91425ec465507c, type: 3}
+  m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -25,5 +25,6 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats: []
-    m_Colors: []
+    m_Colors:
+    - _Diffuse: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
