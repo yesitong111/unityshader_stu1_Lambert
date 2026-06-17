@@ -1,0 +1,18 @@
+// ─── Half Lambert ─── Chapter6_HalfLambert.shader ───
+// 背光面不再全黑，过渡更柔（Valve 风格常用）
+
+fixed4 frag(v2f i) : SV_Target
+{
+    fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+    fixed3 worldNormal  = normalize(i.worldNormal);
+    fixed3 worldLightDir = normalize(_WorldSpaceLightPos0.xyz);
+
+    // ★ 核心：dot * 0.5 + 0.5  将 [-1,1] 映射到 [0,1]
+    // 标准 Lambert: saturate(dot) → 背光面直接 = 0（全黑）
+    // Half Lambert:  dot*0.5+0.5 → 背光面仍保留 0~0.5 亮度
+    fixed halfLambert = dot(worldNormal, worldLightDir) * 0.5 + 0.5;
+    fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb * halfLambert;
+
+    fixed3 color = ambient + diffuse;
+    return fixed4(color, 1.0);
+}

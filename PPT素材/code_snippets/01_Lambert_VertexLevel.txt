@@ -1,0 +1,24 @@
+// ─── Lambert 逐顶点 ─── Chapter6_DiffuseVertexLevel.shader ───
+// 光照在顶点计算，片元仅插值
+
+v2f vert(a2v v)
+{
+    v2f o;
+    o.pos = UnityObjectToClipPos(v.vertex);
+
+    fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
+    fixed3 worldNormal = normalize(mul(v.normal, (float3x3)unity_WorldToObject));
+    fixed3 worldLight  = normalize(_WorldSpaceLightPos0.xyz);
+
+    // ★ 核心：Lambert 漫反射 = N·L，saturate 钳制负值
+    fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb
+                   * saturate(dot(worldNormal, worldLight));
+
+    o.color = ambient + diffuse;          // 最终颜色在顶点级完成
+    return o;
+}
+
+fixed4 frag(v2f i) : SV_Target
+{
+    return fixed4(i.color, 1.0);          // 片元仅做插值，无额外计算
+}
